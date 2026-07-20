@@ -1,70 +1,66 @@
-import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import * as authService from '../services/authService';
-import { AuthContext } from './authContext.js';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { authApi } from '../api';
+import { clearToken, getToken, setToken } from '../api/client';
+
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const persistSession = ({ user: nextUser, accessToken }) => {
-        localStorage.setItem('ste_access_token', accessToken);
-        setUser(nextUser);
-    };
+  const loadSession = useCallback(async () => {
+    if (!getToken()) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await authApi.me();
+      setUser(res.data.user);
+    } catch {
+      clearToken();
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    const login = async (payload) => {
-        const data = await authService.login(payload);
-        persistSession(data);
-        toast.success('Chào mừng bạn quay lại STE');
-    };
+  useEffect(() => {
+    loadSession();
+  }, [loadSession]);
 
-    const register = async (payload) => {
-        const data = await authService.register({ ...payload, role: 'student' });
-        persistSession(data);
-        toast.success('Hồ sơ sinh viên đã sẵn sàng');
-    };
+  const login = useCallback(async (credentials) => {
+    const res = await authApi.login(credentials);
+    setToken(res.data.token);
+    setUser(res.data.user);
+    return res.data.user;
+  }, []);
 
-    const logout = async () => {
-        try {
-            await authService.logout();
-        } finally {
-            localStorage.removeItem('ste_access_token');
-            setUser(null);
-            toast.success('Đã đăng xuất');
-        }
-    };
+  const register = useCallback(async (payload) => {
+    const res = await authApi.register(payload);
+    setToken(res.data.token);
+    setUser(res.data.user);
+    return res.data.user;
+  }, []);
 
-    const refreshProfile = async () => {
-        const profile = await authService.getProfile();
-        setUser(profile);
-        return profile;
-    };
+  const logout = useCallback(async () => {
+    try {
+      if (getToken()) await authApi.logout();
+    } catch {
+    } finally {
+      clearToken();
+      setUser(null);
+    }
+  }, []);
 
-    useEffect(() => {
-        const bootstrap = async () => {
-            const token = localStorage.getItem('ste_access_token');
+  const value = useMemo(
+    () => ({ user, setUser, loading, login, register, logout }),
+    [user, loading, login, register, logout]
+  );
 
-            if (!token) {
-                setIsLoading(false);
-                return;
-            }
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
 
-            try {
-                await refreshProfile();
-            } catch {
-                localStorage.removeItem('ste_access_token');
-                setUser(null);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        bootstrap();
-    }, []);
-
-    return (
-        <AuthContext.Provider value={{ user, setUser, isAuthenticated: Boolean(user), isLoading, login, register, logout, refreshProfile }}>
-            {children}
-        </AuthContext.Provider>
-    );
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth phải được dùng bên trong AuthProvider');
+  return ctx;
 };
