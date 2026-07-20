@@ -1,22 +1,28 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-export const useAsync = (asyncFn) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
+export const useAsync = (asyncFn, deps = [], immediate = true) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(immediate);
+  const [error, setError] = useState(null);
 
-    const execute = useCallback(async (...args) => {
-        setIsLoading(true);
-        setError(null);
+  const run = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await asyncFn();
+      setData(result);
+      return result;
+    } catch (err) {
+      setError(err.message || 'Đã xảy ra lỗi');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, deps);
 
-        try {
-            return await asyncFn(...args);
-        } catch (nextError) {
-            setError(nextError.message);
-            throw nextError;
-        } finally {
-            setIsLoading(false);
-        }
-    }, [asyncFn]);
+  useEffect(() => {
+    if (immediate) run().catch(() => {});
+  }, [run]);
 
-    return { execute, isLoading, error };
+  return { data, loading, error, run, setData };
 };
