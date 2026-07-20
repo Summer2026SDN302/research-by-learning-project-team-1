@@ -1,86 +1,130 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth.js';
-import AppLayout from './components/layout/AppLayout.jsx';
-import LoginPage from './pages/auth/LoginPage.jsx';
-import RegisterPage from './pages/auth/RegisterPage.jsx';
-import DashboardPage from './pages/DashboardPage.jsx';
-import ProfilePage from './pages/profile/ProfilePage.jsx';
-import TeamsPage from './pages/teams/TeamsPage.jsx';
-import CreateTeamPage from './pages/teams/CreateTeamPage.jsx';
-import TeammatesPage from './pages/teams/TeammatesPage.jsx';
-import CoursesPage from './pages/courses/CoursesPage.jsx';
-import CreateCoursePage from './pages/courses/CreateCoursePage.jsx';
-import MaterialsPage from './pages/materials/MaterialsPage.jsx';
-import CreateMaterialPage from './pages/materials/CreateMaterialPage.jsx';
-import AdminUsersPage from './pages/admin/AdminUsersPage.jsx';
-import QuizzesPage from './pages/quizzes/QuizzesPage.jsx';
-import TakeQuizPage from './pages/quizzes/TakeQuizPage.jsx';
-import CreateQuizPage from './pages/quizzes/CreateQuizPage.jsx';
-import PostsPage from './pages/posts/PostsPage.jsx';
-import CreatePostPage from './pages/posts/CreatePostPage.jsx';
-import EventsPage from './pages/events/EventsPage.jsx';
-import CreateEventPage from './pages/events/CreateEventPage.jsx';
-import WorkspacePage from './pages/workspace/WorkspacePage.jsx';
+import AppLayout from './components/layout/AppLayout';
+import { GuestRoute, ProtectedRoute, RoleRoute } from './routes/guards';
 
-const ProtectedRoute = ({ children }) => {
-    const { isAuthenticated, isLoading } = useAuth();
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
-    if (isLoading) {
-        return <div className='grid min-h-screen place-items-center bg-bg text-ink'>Đang tải STE...</div>;
-    }
+import DashboardRouter from './pages/DashboardRouter';
+import ProfilePage from './pages/ProfilePage';
+import FeedPage from './pages/FeedPage';
+import MaterialsPage from './pages/MaterialsPage';
+import QuizzesPage from './pages/QuizzesPage';
+import QuizTakePage from './pages/QuizTakePage';
+import AssignmentsPage from './pages/AssignmentsPage';
+import AssignmentDetailPage from './pages/AssignmentDetailPage';
+import CourseLessonsPage from './pages/CourseLessonsPage';
+import CalendarPage from './pages/CalendarPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+import SearchPage from './pages/SearchPage';
+import ChangePasswordPage from './pages/auth/ChangePasswordPage';
+import EventDetailPage from './pages/EventDetailPage';
+import StudentDirectoryPage from './pages/StudentDirectoryPage';
+import StudentPublicProfilePage from './pages/StudentPublicProfilePage';
+import NotFoundPage from './pages/NotFoundPage';
+import ForbiddenPage from './pages/ForbiddenPage';
+import InvitationsPage from './pages/student/InvitationsPage';
+import AdminWorkspacePage from './pages/admin/AdminWorkspacePage';
 
-    if (!isAuthenticated) {
-        return <Navigate to='/login' replace />;
-    }
+import DiscoverTeamsPage from './pages/student/DiscoverTeamsPage';
+import MyTeamsPage from './pages/student/MyTeamsPage';
+import TeamDetailPage from './pages/student/TeamDetailPage';
+import MyRequestsPage from './pages/student/MyRequestsPage';
+import StudentCoursesPage from './pages/student/StudentCoursesPage';
+import GradesPage from './pages/student/GradesPage';
 
-    return children;
-};
+import CoursesPage from './pages/lecturer/CoursesPage';
+import CourseGradebookPage from './pages/lecturer/CourseGradebookPage';
+import CourseAnalyticsPage from './pages/lecturer/CourseAnalyticsPage';
+import AnnouncementsRouter from './pages/AnnouncementsRouter';
+import MonitorTeamsPage from './pages/lecturer/MonitorTeamsPage';
 
-const PublicRoute = ({ children }) => {
-    const { isAuthenticated } = useAuth();
+import UsersPage from './pages/admin/UsersPage';
+import ModerationPage from './pages/admin/ModerationPage';
 
-    if (isAuthenticated) {
-        return <Navigate to='/' replace />;
-    }
+const App = () => (
+  <Routes>
+    <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+    <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+    <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+    <Route path="/reset-password" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
 
-    return children;
-};
+    <Route
+      path="/app"
+      element={
+        <ProtectedRoute>
+          <AppLayout />
+        </ProtectedRoute>
+      }
+    >
+      <Route index element={<DashboardRouter />} />
+      <Route path="profile" element={<ProfilePage />} />
+      <Route path="profile/change-password" element={<ChangePasswordPage />} />
+      <Route path="feed" element={<FeedPage />} />
+      <Route path="materials" element={<MaterialsPage />} />
+      <Route path="quizzes" element={<QuizzesPage />} />
+      <Route path="quizzes/:id" element={<QuizTakePage />} />
 
-const App = () => {
-    return (
-        <Routes>
-            <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
-            <Route path='/register' element={<PublicRoute><RegisterPage /></PublicRoute>} />
-            <Route
-                path='/'
-                element={
-                    <ProtectedRoute>
-                        <AppLayout />
-                    </ProtectedRoute>
-                }
-            >
-                <Route index element={<DashboardPage />} />
-                <Route path='profile' element={<ProfilePage />} />
-                <Route path='teams' element={<TeamsPage />} />
-                <Route path='teams/create' element={<CreateTeamPage />} />
-                <Route path='teams/:teamId/workspace' element={<WorkspacePage />} />
-                <Route path='teammates' element={<TeammatesPage />} />
-                <Route path='courses' element={<CoursesPage />} />
-                <Route path='courses/create' element={<CreateCoursePage />} />
-                <Route path='materials' element={<MaterialsPage />} />
-                <Route path='materials/create' element={<CreateMaterialPage />} />
-                <Route path='quizzes' element={<QuizzesPage />} />
-                <Route path='quizzes/create' element={<CreateQuizPage />} />
-                <Route path='quizzes/:id/take' element={<TakeQuizPage />} />
-                <Route path='posts' element={<PostsPage />} />
-                <Route path='posts/create' element={<CreatePostPage />} />
-                <Route path='events' element={<EventsPage />} />
-                <Route path='events/create' element={<CreateEventPage />} />
-                <Route path='admin/users' element={<AdminUsersPage />} />
-            </Route>
-            <Route path='*' element={<Navigate to='/' replace />} />
-        </Routes>
-    );
-};
+      <Route
+        path="assignments"
+        element={<RoleRoute roles={['student', 'lecturer', 'admin']}><AssignmentsPage /></RoleRoute>}
+      />
+      <Route
+        path="assignments/:id"
+        element={<RoleRoute roles={['student', 'lecturer', 'admin']}><AssignmentDetailPage /></RoleRoute>}
+      />
+      <Route path="grades" element={<RoleRoute roles={['student']}><GradesPage /></RoleRoute>} />
+      <Route
+        path="course-catalog"
+        element={<RoleRoute roles={['student']}><StudentCoursesPage /></RoleRoute>}
+      />
+      <Route path="courses/:id/lessons" element={<CourseLessonsPage />} />
+      <Route path="calendar" element={<CalendarPage />} />
+      <Route path="leaderboard" element={<LeaderboardPage />} />
+      <Route path="search" element={<SearchPage />} />
+      <Route path="events/:id" element={<EventDetailPage />} />
+      <Route path="students" element={<StudentDirectoryPage />} />
+      <Route path="students/:id" element={<StudentPublicProfilePage />} />
+
+      <Route
+        path="teams/discover"
+        element={<RoleRoute roles={['student']}><DiscoverTeamsPage /></RoleRoute>}
+      />
+      <Route path="teams" element={<RoleRoute roles={['student']}><MyTeamsPage /></RoleRoute>} />
+      <Route path="teams/:id" element={<TeamDetailPage />} />
+      <Route path="requests" element={<RoleRoute roles={['student']}><MyRequestsPage /></RoleRoute>} />
+      <Route path="invitations" element={<RoleRoute roles={['student']}><InvitationsPage /></RoleRoute>} />
+
+      <Route
+        path="courses"
+        element={<RoleRoute roles={['lecturer', 'admin']}><CoursesPage /></RoleRoute>}
+      />
+      <Route
+        path="courses/:id/gradebook"
+        element={<RoleRoute roles={['lecturer', 'admin']}><CourseGradebookPage /></RoleRoute>}
+      />
+      <Route
+        path="courses/:id/analytics"
+        element={<RoleRoute roles={['lecturer', 'admin']}><CourseAnalyticsPage /></RoleRoute>}
+      />
+      <Route path="announcements" element={<AnnouncementsRouter />} />
+      <Route
+        path="monitor"
+        element={<RoleRoute roles={['lecturer']}><MonitorTeamsPage /></RoleRoute>}
+      />
+
+      <Route path="users" element={<RoleRoute roles={['admin']}><UsersPage /></RoleRoute>} />
+      <Route path="moderation" element={<RoleRoute roles={['admin']}><ModerationPage /></RoleRoute>} />
+      <Route path="admin-workspace" element={<RoleRoute roles={['admin']}><AdminWorkspacePage /></RoleRoute>} />
+
+      <Route path="forbidden" element={<ForbiddenPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Route>
+
+    <Route path="*" element={<NotFoundPage />} />
+  </Routes>
+);
 
 export default App;
