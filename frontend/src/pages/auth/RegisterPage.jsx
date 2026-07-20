@@ -1,55 +1,80 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import AuthShell from './AuthShell.jsx';
-import Button from '../../components/common/Button.jsx';
-import Input from '../../components/common/Input.jsx';
-import { useAuth } from '../../hooks/useAuth.js';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { Button, Input } from '../../components/common';
+import AuthShell from './AuthShell';
 
 const RegisterPage = () => {
-    const navigate = useNavigate();
-    const { register } = useAuth();
-    const [form, setForm] = useState({ name: '', email: '', password: '' });
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register } = useAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ name: '', email: '', password: '', major: '' });
+  const [loading, setLoading] = useState(false);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-    };
+  const submit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    try {
+      await register(form);
+      toast.success('Tạo tài khoản thành công. Chào mừng bạn đến với STE!');
+      navigate('/app', { replace: true });
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
+  return (
+    <AuthShell title="Đăng ký sinh viên" subtitle="Tạo tài khoản để bắt đầu tìm nhóm và ôn tập cùng STE">
+      <form onSubmit={submit} className="space-y-4">
+        <Input
+          id="name"
+          label="Họ và tên"
+          placeholder="Nguyễn Văn A"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          required
+        />
+        <Input
+          id="email"
+          label="Email trường"
+          type="email"
+          placeholder="tenban@fpt.edu.vn"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          required
+        />
+        <Input
+          id="major"
+          label="Chuyên ngành"
+          placeholder="Kỹ thuật phần mềm"
+          value={form.major}
+          onChange={(e) => setForm({ ...form, major: e.target.value })}
+        />
+        <Input
+          id="password"
+          label="Mật khẩu"
+          type="password"
+          placeholder="Tối thiểu 8 ký tự"
+          value={form.password}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          required
+        />
+        <Button type="submit" loading={loading} className="w-full">
+          Đăng ký
+        </Button>
+      </form>
 
-        try {
-            await register(form);
-            navigate('/profile');
-        } catch (error) {
-            toast.error(error.message);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <AuthShell
-            eyebrow='Tạo tài khoản'
-            title='Bắt đầu với STE'
-            description='Tạo tài khoản, sau đó cập nhật GPA, kỹ năng và sở thích để AI gợi ý nhóm phù hợp.'
-            linkText='Đã có tài khoản?'
-            linkTo='/login'
-            linkLabel='Đăng nhập'
-        >
-            <form className='space-y-4' onSubmit={handleSubmit}>
-                <Input label='Họ và tên' name='name' value={form.name} onChange={handleChange} placeholder='Nguyễn Văn An' minLength={2} maxLength={50} required />
-                <Input label='Email' name='email' type='email' value={form.email} onChange={handleChange} placeholder='student@fpt.edu.vn' required />
-                <Input label='Mật khẩu' name='password' type='password' value={form.password} onChange={handleChange} placeholder='Tối thiểu 6 ký tự' minLength={6} required />
-                <Button type='submit' className='w-full' disabled={isSubmitting}>
-                    {isSubmitting ? 'Đang tạo...' : 'Tạo tài khoản'}
-                </Button>
-            </form>
-        </AuthShell>
-    );
+      <p className="mt-6 text-center text-sm text-slate-500">
+        Đã có tài khoản?{' '}
+        <Link to="/login" className="font-semibold text-brand-600 hover:underline">
+          Đăng nhập
+        </Link>
+      </p>
+    </AuthShell>
+  );
 };
 
 export default RegisterPage;
