@@ -1,9 +1,42 @@
 const asyncHandler = require('../utils/async-handler');
 const quizService = require('../services/quiz.service');
+const fs = require('fs/promises');
+const path = require('path');
+const { createTemplateWorkbook } = require('../utils/quiz-workbook');
 
 const createQuiz = asyncHandler(async (req, res) => {
   const quiz = await quizService.createQuiz(req.user.id, req.body);
   res.status(201).json({ success: true, data: { quiz } });
+});
+
+const importQuiz = asyncHandler(async (req, res) => {
+  if (!req.file) return res.status(422).json({ success: false, message: 'Vui lòng chọn file Excel' });
+  if (path.extname(req.file.originalname).toLowerCase() !== '.xlsx') {
+    await fs.unlink(req.file.path).catch(() => {});
+    return res.status(422).json({ success: false, message: 'Vui lòng sử dụng file Excel .xlsx' });
+  }
+  try {
+    const quiz = await quizService.importQuiz(req.user.id, req.file.path, req.body);
+    res.status(201).json({ success: true, data: { quiz } });
+  } finally {
+    await fs.unlink(req.file.path).catch(() => {});
+  }
+});
+
+const downloadTemplate = asyncHandler(async (req, res) => {
+  const workbook = await createTemplateWorkbook(false);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="ste-quiz-template.xlsx"');
+  await workbook.xlsx.write(res);
+  res.end();
+});
+
+const downloadSample = asyncHandler(async (req, res) => {
+  const workbook = await createTemplateWorkbook(true);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="ste-quiz-sample.xlsx"');
+  await workbook.xlsx.write(res);
+  res.end();
 });
 
 const listQuizzes = asyncHandler(async (req, res) => {
@@ -38,6 +71,9 @@ const deleteQuiz = asyncHandler(async (req, res) => {
 
 module.exports = {
   createQuiz,
+  importQuiz,
+  downloadTemplate,
+  downloadSample,
   listQuizzes,
   getQuiz,
   submitAttempt,

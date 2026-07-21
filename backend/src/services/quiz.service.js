@@ -2,6 +2,7 @@ const Quiz = require('../models/quiz.model');
 const QuizAttempt = require('../models/quiz-attempt.model');
 const AppError = require('../utils/app-error');
 const { parsePagination, buildPageResult } = require('../utils/pagination');
+const { parseQuestions } = require('../utils/quiz-workbook');
 
 const QUIZ_LIST_PROJECTION = 'title course createdBy questions isPublished createdAt';
 
@@ -22,6 +23,17 @@ const sameSet = (a, b) => {
 const createQuiz = async (createdBy, payload) => {
   validateQuestions(payload.questions);
   return Quiz.create({ ...payload, createdBy });
+};
+
+const importQuiz = async (createdBy, filePath, payload) => {
+  const questions = await parseQuestions(filePath);
+  const isPublished = payload.isPublished === false || payload.isPublished === 'false' ? false : true;
+  return createQuiz(createdBy, {
+    title: payload.title,
+    course: payload.course || null,
+    isPublished,
+    questions,
+  });
 };
 
 const listQuizzes = async (query, requester) => {
@@ -144,6 +156,7 @@ const deleteQuiz = async (quizId, requester) => {
 
 module.exports = {
   createQuiz,
+  importQuiz,
   listQuizzes,
   getQuizForTaking,
   submitAttempt,
