@@ -8,14 +8,10 @@ const HIGHLIGHTS = [
 
 const AuthShell = ({ title, subtitle, children }) => (
   <div className="flex min-h-screen">
-    <div className="hidden w-1/2 flex-col justify-between bg-gradient-to-br from-brand-700 via-brand-600 to-brand-800 p-12 text-white lg:flex">
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-          <Icon name="logo" className="h-6 w-6" />
-        </span>
-        <div>
-          <p className="text-lg font-extrabold">STE</p>
-          <p className="text-xs text-white/70">Smart Student Environment</p>
+      <div className="hidden w-1/2 flex-col justify-between bg-gradient-to-br from-brand-700 via-brand-600 to-brand-800 p-12 text-white lg:flex">
+      <div className="flex items-center">
+        <div className="rounded-2xl bg-white px-4 py-2 shadow-lg shadow-brand-900/10">
+          <img src="/logo-web.png" alt="STE - Smart Student Environment" className="h-12 w-auto max-w-[240px] object-contain" />
         </div>
       </div>
 
