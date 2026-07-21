@@ -25,6 +25,7 @@ import StudentDirectoryPage from './pages/StudentDirectoryPage';
 import StudentPublicProfilePage from './pages/StudentPublicProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ForbiddenPage from './pages/ForbiddenPage';
+import HomePage from './pages/HomePage';
 import InvitationsPage from './pages/student/InvitationsPage';
 import AdminWorkspacePage from './pages/admin/AdminWorkspacePage';
 
@@ -46,6 +47,7 @@ import ModerationPage from './pages/admin/ModerationPage';
 
 const App = () => (
   <Routes>
+    <Route path="/" element={<HomePage />} />
     <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
     <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
     <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
