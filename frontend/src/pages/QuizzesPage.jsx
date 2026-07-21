@@ -8,6 +8,7 @@ import Icon from '../components/common/Icon';
 import PageHeader from '../components/layout/PageHeader';
 import { formatRelative } from '../utils/format';
 import QuizBuilderModal from './lecturer/QuizBuilderModal';
+import QuizImportModal from './lecturer/QuizImportModal';
 
 const QuizzesPage = () => {
   const { user } = useAuth();
@@ -21,6 +22,7 @@ const QuizzesPage = () => {
   const [loading, setLoading] = useState(true);
   const [courseFilter, setCourseFilter] = useState('');
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState(null);
   const [toDelete, setToDelete] = useState(null);
 
@@ -90,11 +92,7 @@ const QuizzesPage = () => {
         title={isStudent ? 'Ôn tập & Kiểm tra' : 'Bộ câu hỏi'}
         description="Luyện tập với các bộ câu hỏi trắc nghiệm do giảng viên biên soạn."
         action={
-          canManage && (
-            <Button onClick={openCreate}>
-              <Icon name="plus" className="h-4 w-4" /> Tạo thủ công
-            </Button>
-          )
+          canManage && <div className="flex flex-wrap gap-2"><Button variant="secondary" onClick={() => setImportOpen(true)}>Nhập Excel</Button><Button onClick={openCreate}><Icon name="plus" className="h-4 w-4" /> Tạo thủ công</Button></div>
         }
       />
 
@@ -114,7 +112,7 @@ const QuizzesPage = () => {
           title="Chưa có bộ câu hỏi"
           description={
             canManage
-              ? 'Bấm "Tạo thủ công" để biên soạn bộ câu hỏi cho sinh viên.'
+              ? 'Bấm "Tạo thủ công" hoặc "Nhập Excel" để tạo bộ câu hỏi cho sinh viên.'
               : 'Hiện chưa có bộ câu hỏi nào được công bố. Vui lòng quay lại sau.'
           }
         />
@@ -188,6 +186,8 @@ const QuizzesPage = () => {
         courses={courses}
         quiz={editingQuiz}
       />
+
+      <QuizImportModal open={importOpen} onClose={() => setImportOpen(false)} onSaved={load} courses={courses} />
 
       <ConfirmDialog
         open={Boolean(toDelete)}
