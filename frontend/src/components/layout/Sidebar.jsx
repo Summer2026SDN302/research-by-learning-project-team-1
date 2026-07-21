@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { NAV_BY_ROLE } from '../../routes/navigation';
 import { ROLE_LABELS } from '../../utils/constants';
@@ -7,7 +7,12 @@ import Icon from '../common/Icon';
 
 const Sidebar = ({ open, onClose }) => {
   const { user } = useAuth();
+  const { pathname } = useLocation();
   const sections = NAV_BY_ROLE[user?.role] || [];
+  const activePath = sections
+    .flatMap((section) => section.items)
+    .filter((item) => pathname === item.to || (!item.end && pathname.startsWith(`${item.to}/`)))
+    .sort((a, b) => b.to.length - a.to.length)[0]?.to;
 
   return (
     <>
@@ -18,14 +23,8 @@ const Sidebar = ({ open, onClose }) => {
           open ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex items-center gap-2.5 border-b border-slate-100 px-5 py-4">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
-            <Icon name="logo" className="h-5 w-5" />
-          </span>
-          <div>
-            <p className="text-sm font-extrabold tracking-tight text-slate-900">STE</p>
-            <p className="text-[11px] font-medium text-slate-400">Smart Student Environment</p>
-          </div>
+        <div className="flex h-[73px] items-center border-b border-slate-100 px-5 py-4">
+          <img src="/logo-web.png" alt="STE - Smart Student Environment" className="h-10 w-full object-contain object-left" />
         </div>
 
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
@@ -36,23 +35,21 @@ const Sidebar = ({ open, onClose }) => {
               </p>
               <div className="space-y-0.5">
                 {section.items.map((item) => (
-                  <NavLink
+                  <Link
                     key={item.to}
                     to={item.to}
-                    end={item.end}
                     onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
-                        isActive
-                          ? 'bg-brand-50 text-brand-700'
-                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                      )
-                    }
+                    aria-current={activePath === item.to ? 'page' : undefined}
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
+                      activePath === item.to
+                        ? 'bg-brand-50 text-brand-700'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    )}
                   >
                     <Icon name={item.icon} className="h-5 w-5 shrink-0" />
                     {item.label}
-                  </NavLink>
+                  </Link>
                 ))}
               </div>
             </div>

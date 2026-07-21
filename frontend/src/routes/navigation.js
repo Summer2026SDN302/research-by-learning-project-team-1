@@ -20,22 +20,25 @@ export const NAV_BY_ROLE = {
       ],
     },
     {
-      title: 'Nhóm & cộng đồng',
+      title: 'Nhóm',
       items: [
-        { to: '/app/teams/discover', label: 'Tìm nhóm & gợi ý', icon: 'sparkles' },
+        { to: '/app/teams/discover', label: 'Khám phá nhóm', icon: 'sparkles' },
         { to: '/app/teams', label: 'Nhóm của tôi', icon: 'teams' },
         { to: '/app/requests', label: 'Yêu cầu tham gia', icon: 'requests' },
         { to: '/app/invitations', label: 'Lời mời vào nhóm', icon: 'requests' },
+      ],
+    },
+    {
+      title: 'Cộng đồng',
+      items: [
         { to: '/app/feed', label: 'Bảng tin & Sự kiện', icon: 'feed' },
+        { to: '/app/students', label: 'Tìm sinh viên', icon: 'users' },
         { to: '/app/leaderboard', label: 'Bảng xếp hạng', icon: 'trophy' },
       ],
     },
     {
       title: 'Cá nhân',
-      items: [
-        { to: '/app/profile', label: 'Hồ sơ cá nhân', icon: 'profile' },
-        { to: '/app/students', label: 'Tìm sinh viên', icon: 'users' },
-      ],
+      items: [{ to: '/app/profile', label: 'Hồ sơ cá nhân', icon: 'profile' }],
     },
   ],
   lecturer: [
